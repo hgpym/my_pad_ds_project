@@ -1,6 +1,6 @@
 def hello_world():
-    print("Hello from main branch!")
-    return "Hello World - MAIN VERSION"
+    print("Hello from resolved conflict!")
+    return "Hello World - RESOLVED"
 
 def add_numbers(a, b):
     return a + b
