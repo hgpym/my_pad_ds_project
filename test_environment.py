@@ -1,25 +1,18 @@
 import sys
 
-REQUIRED_PYTHON = "python"
+
+def test_environment() -> None:
+    """Test that the environment is set up correctly."""
+    python_version = sys.version_info
+    assert python_version.major == 3
+    assert python_version.minor >= 8
+    print("✓ Environment is set up correctly!")
 
 
-def main():
-    system_major = sys.version_info.major
-    if REQUIRED_PYTHON == "python":
-        required_major = 2
-    elif REQUIRED_PYTHON == "python3":
-        required_major = 3
-    else:
-        raise ValueError("Unrecognized python interpreter: {}".format(
-            REQUIRED_PYTHON))
-
-    if system_major != required_major:
-        raise TypeError(
-            "This project requires Python {}. Found: Python {}".format(
-                required_major, sys.version))
-    else:
-        print(">>> Development environment passes all tests!")
+def main() -> None:
+    """Main function."""
+    test_environment()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
