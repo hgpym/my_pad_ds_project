@@ -1,6 +1,9 @@
 def hello_world():
-    print("Hello from feature 1!")
-    return "Hello World"
+    print("Hello from main branch!")
+    return "Hello World - MAIN VERSION"
 
 def add_numbers(a, b):
     return a + b
+
+def another_function():
+    return "This is another function"
