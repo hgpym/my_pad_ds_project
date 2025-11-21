@@ -78,6 +78,20 @@ target/
 # exclude data from source control by default
 /data/
 
+# Processed data (generated files)
+src/data/processed/
+src/data/raw/data.csv
+
+# Docker volumes for MinIO
+minio_data/
+
+# Poetry
+poetry.lock  # Оставляем, если хотим фиксировать версии, иначе закомментируйте
+
+# IDE
+*.code-workspace
+.history/
+
 # Mac OS-specific storage files
 .DS_Store
 

@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "my-pad-ds-project"
+version = "0.1.0"
+description = ""
+authors = ["hgpym <thesuperiorflashnew52@gmail.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+boto3 = "^1.41.1"
+pandas = "^2.3.3"
+python-dotenv = "^1.2.1"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.4.0"
+black = "^25.9.0"
+flake8 = "^7.3.0"
+flake8-bugbear = "^25.10.21"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

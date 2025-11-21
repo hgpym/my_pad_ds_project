@@ -1,14 +1,18 @@
-.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3
+.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3 minio-up minio-down upload-raw pipeline
 
 #################################################################################
 # GLOBALS                                                                       #
 #################################################################################
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
+BUCKET = my-bucket
 PROFILE = default
 PROJECT_NAME = dz_pad_project
 PYTHON_INTERPRETER = python
+POETRY = poetry
+S3_ENDPOINT = http://localhost:9000
+S3_ACCESS_KEY = minioadmin
+S3_SECRET_KEY = minioadmin
 
 ifeq (,$(shell which conda))
 HAS_CONDA=False
@@ -20,10 +24,10 @@ endif
 # COMMANDS                                                                      #
 #################################################################################
 
-## Install Python Dependencies
+## Install Python Dependencies using Poetry
 requirements: test_environment
-	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+	@echo ">>> Installing dependencies with Poetry..."
+	$(POETRY) install
 
 ## Make Dataset
 data: requirements
@@ -36,7 +40,49 @@ clean:
 
 ## Lint using flake8
 lint:
-	flake8 src
+	$(POETRY) run flake8 src scripts
+
+## Start MinIO container
+minio-up:
+	@echo ">>> Starting MinIO container..."
+	docker-compose up -d
+	@echo ">>> MinIO API: $(S3_ENDPOINT)"
+	@echo ">>> MinIO Console: http://localhost:9001"
+
+## Stop MinIO container
+minio-down:
+	@echo ">>> Stopping MinIO container..."
+	docker-compose down
+
+## Upload raw dataset to S3
+upload-raw:
+	@if [ -z "$(BUCKET)" ] || [ -z "$(KEY)" ] || [ -z "$(FILE)" ]; then \
+		echo "Error: BUCKET, KEY, and FILE must be specified"; \
+		echo "Usage: make upload-raw BUCKET=my-bucket KEY=raw/titanic.csv FILE=src/data/raw/Titanic-Dataset.csv"; \
+		exit 1; \
+	fi
+	$(POETRY) run python scripts/upload_raw.py \
+		--endpoint $(S3_ENDPOINT) \
+		--access-key $(S3_ACCESS_KEY) \
+		--secret-key $(S3_SECRET_KEY) \
+		--bucket $(BUCKET) \
+		--key $(KEY) \
+		--file $(FILE)
+
+## Run full pipeline: download from S3 -> process -> upload to S3
+pipeline:
+	@if [ -z "$(BUCKET)" ] || [ -z "$(RAW_KEY)" ]; then \
+		echo "Error: BUCKET and RAW_KEY must be specified"; \
+		echo "Usage: make pipeline BUCKET=my-bucket RAW_KEY=raw/titanic.csv [OUT_KEY=processed/titanic_processed.csv]"; \
+		exit 1; \
+	fi
+	$(POETRY) run python scripts/s3_pipeline.py \
+		--endpoint $(S3_ENDPOINT) \
+		--access-key $(S3_ACCESS_KEY) \
+		--secret-key $(S3_SECRET_KEY) \
+		--bucket $(BUCKET) \
+		--raw-key $(RAW_KEY) \
+		--out-key $(if $(OUT_KEY),$(OUT_KEY),processed/data_processed.csv)
 
 ## Upload Data to S3
 sync_data_to_s3:

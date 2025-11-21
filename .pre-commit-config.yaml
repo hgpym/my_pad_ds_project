@@ -30,3 +30,7 @@ repos:
     hooks:
       - id: mypy
         args: [--config-file=.mypy.ini]
+        additional_dependencies:
+        - boto3-stubs
+        - botocore-stubs
+        - pandas-stubs
